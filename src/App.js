@@ -3,10 +3,14 @@ import { useEffect, useState } from "react";
 
 function App() {
   const tamanho = 20;
-  const [cobra, setCobra] = useState([[5, 5]]);
+  const [cobra, setCobra] = useState([[8, 5]]);
   const [gameOver, setGameOver] = useState(false);
   const [direcao, setDirecao] = useState("");
-  const [comida, setComida] = useState([10, 10]);
+  const [comida, setComida] = useState([
+    Math.floor(Math.random() * tamanho),
+    Math.floor(Math.random() * tamanho),
+  ]);
+  const [highscore, setHighscore] = useState(0);
   const [score, setScore] = useState(0);
   const [jogar, setJogar] = useState(false);
   const [direcaoInicial, setDirecaoInicial] = useState(true);
@@ -59,6 +63,9 @@ function App() {
             segmento[0] === novaCabeca[0] && segmento[1] === novaCabeca[1]
         )
       ) {
+        if (score > highscore) {
+          setHighscore(score);
+        }
         setGameOver(true);
       }
       if (novaCabeca[0] === comida[0] && novaCabeca[1] === comida[1]) {
@@ -71,7 +78,6 @@ function App() {
       }
 
       if (comeu) {
-        console.log("comeu");
         const novaCobra = [novaCabeca, ...prevCobra];
         return novaCobra;
       } else {
@@ -130,13 +136,17 @@ function App() {
 
       {gameOver && (
         <div className={styles.gameOver}>
-          <h2>Game Over</h2>
+          <h2 className={styles.textoGameOver}>Game Over</h2>
           <button
+            className={styles.btnJogarNovamente}
             onClick={() => {
               setDirecaoInicial(true);
-              setCobra([[5, 5]]);
+              setCobra([[8, 5]]);
               setDirecao("");
-              setComida([10, 10]);
+              setComida([
+                Math.floor(Math.random() * tamanho),
+                Math.floor(Math.random() * tamanho),
+              ]);
               setScore(0);
               setGameOver(false);
             }}
@@ -146,12 +156,21 @@ function App() {
         </div>
       )}
       {!jogar ? (
-        <button onClick={() => setJogar(true)}>Jogar</button>
+        <button className={styles.btnJogar} onClick={() => setJogar(true)}>
+          Jogar
+        </button>
       ) : (
         <div className={styles.app}>
-          <div className={styles.score}>Score: {score}</div>
+          <div className={styles.grid}>
+            <div className={styles.score}>Score: {score}</div>
+            <div className={styles.score}>High Score: {highscore}</div>
+          </div>
+
           {direcaoInicial && (
-            <div className={styles.direcao}>aperte uma direcao</div>
+            <div className={styles.direcao}>
+              <p>Selecione uma direção</p>
+              <img className={styles.arrow} src="/arrows.png"></img>
+            </div>
           )}
           {Array.from({ length: tamanho }, (_, y) => (
             <div key={`l${y}`} className={styles.linha}>
