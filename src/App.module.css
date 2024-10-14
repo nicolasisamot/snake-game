@@ -27,3 +27,12 @@
   height: 2.6rem;
   background-color: green;
 }
+.gameOver {
+  background-color: red;
+  position: absolute;
+  padding: 5rem;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+}

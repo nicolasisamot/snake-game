@@ -2,27 +2,31 @@ import styles from "./App.module.css";
 import { useEffect, useState } from "react";
 
 function App() {
-  console.log("renderizou");
   const tamanho = 20;
-  const [cobra, setCobra] = useState([[0, 0]]);
+  const [cobra, setCobra] = useState([[5, 5]]);
   const [gameOver, setGameOver] = useState(false);
-  const [direcao, setDirecao] = useState("right");
+  const [direcao, setDirecao] = useState("");
   const [comida, setComida] = useState([10, 10]);
   const [score, setScore] = useState(0);
   const [jogar, setJogar] = useState(false);
+  const [direcaoInicial, setDirecaoInicial] = useState(true);
 
   useEffect(() => {
-    if (gameOver) {
-      alert("Game Over");
-    } else {
-      const intervalo = setInterval(() => {
-        moverCobra();
-      }, 100);
-      return () => clearInterval(intervalo);
+    let intervalo;
+    if (jogar && !gameOver) {
+      if (direcao != "" && direcaoInicial == false) {
+        intervalo = setInterval(() => {
+          moverCobra();
+        }, 100);
+      }
     }
-  }, [cobra]);
+
+    return () => clearInterval(intervalo);
+  }, [cobra, jogar, direcaoInicial]);
 
   function moverCobra() {
+    console.log("moveu");
+
     setCobra((prevCobra) => {
       let comeu = false;
       const novaCabeca = [...prevCobra[0]];
@@ -55,7 +59,6 @@ function App() {
             segmento[0] === novaCabeca[0] && segmento[1] === novaCabeca[1]
         )
       ) {
-        setScore(0);
         setGameOver(true);
       }
       if (novaCabeca[0] === comida[0] && novaCabeca[1] === comida[1]) {
@@ -85,15 +88,27 @@ function App() {
     const handleKeyDown = (event) => {
       switch (event.key) {
         case "ArrowRight":
+          if (direcaoInicial === true) {
+            setDirecaoInicial(false);
+          }
           if (direcao !== "left") setDirecao("right");
           break;
         case "ArrowLeft":
+          if (direcaoInicial === true) {
+            setDirecaoInicial(false);
+          }
           if (direcao !== "right") setDirecao("left");
           break;
         case "ArrowUp":
+          if (direcaoInicial === true) {
+            setDirecaoInicial(false);
+          }
           if (direcao !== "down") setDirecao("up");
           break;
         case "ArrowDown":
+          if (direcaoInicial === true) {
+            setDirecaoInicial(false);
+          }
           if (direcao !== "up") setDirecao("down");
           break;
         default:
@@ -113,30 +128,56 @@ function App() {
         <h1 className={styles.title}>Snake Game</h1>
       </header>
 
-      <div className={styles.app}>
-        <div className={styles.score}>Score: {score}</div>
-        {Array.from({ length: tamanho }, (_, y) => (
-          <div key={`l${y}`} className={styles.linha}>
-            {Array.from({ length: tamanho }, (_, x) => {
-              const isCobra = cobra.some(
-                (segment) => segment[0] === y && segment[1] === x
-              );
-              const isComida = comida[0] === y && comida[1] === x;
+      {gameOver && (
+        <div className={styles.gameOver}>
+          <h2>Game Over</h2>
+          <button
+            onClick={() => {
+              setDirecaoInicial(true);
+              setCobra([[5, 5]]);
+              setDirecao("");
+              setComida([10, 10]);
+              setScore(0);
+              setGameOver(false);
+            }}
+          >
+            Jogar Novamente
+          </button>
+        </div>
+      )}
+      {!jogar ? (
+        <button onClick={() => setJogar(true)}>Jogar</button>
+      ) : (
+        <div className={styles.app}>
+          <div className={styles.score}>Score: {score}</div>
+          {direcaoInicial && (
+            <div className={styles.direcao}>aperte uma direcao</div>
+          )}
+          {Array.from({ length: tamanho }, (_, y) => (
+            <div key={`l${y}`} className={styles.linha}>
+              {Array.from({ length: tamanho }, (_, x) => {
+                const isCobra = cobra.some(
+                  (segment) => segment[0] === y && segment[1] === x
+                );
+                const isComida = comida[0] === y && comida[1] === x;
 
-              return (
-                <div
-                  className={
-                    isCobra
-                      ? styles.cobra
-                      : styles.quadrado + " " + (isComida ? styles.comida : "")
-                  }
-                  key={`${x}-${y}`}
-                ></div>
-              );
-            })}
-          </div>
-        ))}
-      </div>
+                return (
+                  <div
+                    className={
+                      isCobra
+                        ? styles.cobra
+                        : styles.quadrado +
+                          " " +
+                          (isComida ? styles.comida : "")
+                    }
+                    key={`${x}-${y}`}
+                  ></div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      )}
     </>
   );
 }
